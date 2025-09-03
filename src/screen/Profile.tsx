@@ -69,6 +69,7 @@ export function ProfileScreen({
       if (json.status) {
         setFirstName(json.firstName);
         setLastName(json.lastName);
+        setPassword(json.password);
         setImage(
           json.profileImagePath
             ? `${PUBLIC_URL}/ToDoDoo/profile_image/${json.profileImagePath}`
@@ -96,6 +97,7 @@ export function ProfileScreen({
   const handleSave = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords don't match");
+
       return;
     }
 
@@ -118,18 +120,19 @@ export function ProfileScreen({
       const response = await fetch(
         `${PUBLIC_URL}/ToDoDoo/UpdateProfile?userId=${userId}`,
         {
-          method: "PUT",
+          method: "POST",
           body: formData,
           headers: {
-            "Content-Type": "multipart/form-data",
             "ngrok-skip-browser-warning": "any-value",
           },
         }
       );
 
       const json = await response.json();
+      console.log(json);
 
       if (json.status) {
+        Alert.alert("Profile updated successfully!");
         Toast.show({
           type: ALERT_TYPE.SUCCESS,
           title: "Success",
@@ -193,50 +196,52 @@ export function ProfileScreen({
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="First Name"
-              value={firstName}
-              onChangeText={setFirstName}
-              autoCapitalize="words"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label1}>First name:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="First Name"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label1}>Last name:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Last Name"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+              />
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Last Name"
-              value={lastName}
-              onChangeText={setLastName}
-              autoCapitalize="words"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label1}>Current password:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="current Password"
+                value={password}
+                onChangeText={setPassword}
+                autoCapitalize="none"
+              />
+            </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="New Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label1}>confirm new password:</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                autoCapitalize="none"
+              />
+            </View>
 
             {/* Buttons */}
             <TouchableOpacity style={styles.button} onPress={handleSave}>
               <Text style={styles.buttonText}>SAVE CHANGES</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setIsEditing(false)}
-            >
-              <Text style={styles.cancelText}>CANCEL</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -346,16 +351,20 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
+  label1: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
   input: {
-    width: "100%",
-    height: 40,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 20,
     paddingHorizontal: 15,
-    marginVertical: 10,
+    paddingVertical: 10,
     backgroundColor: "white",
     fontSize: 14,
+    flex: 1,
   },
   button: {
     backgroundColor: "#9B5DE5",
@@ -385,5 +394,11 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 16,
     fontWeight: "600",
+  },
+  inputContainer: {
+    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

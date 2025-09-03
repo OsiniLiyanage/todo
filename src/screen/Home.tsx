@@ -385,15 +385,18 @@ export function HomeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.circleTopLeft} />
         <View style={styles.circleTopRight} />
+        <View style={styles.circleMiddleLeft} />
+        <View style={styles.circleBottomRight} />
 
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons name="menu" size={24} color={"#333"} />
+          {/* Add Toggle Button */}
+          <TouchableOpacity style={{ alignSelf: "flex-end", marginBottom: 10 }}>
+            <Ionicons size={24} />
           </TouchableOpacity>
 
           <View style={styles.userInfo}>
             <Text style={styles.userName}>
-              Hello, {name ? name.split(" ")[0] : "User"}! 👋
+              Hello, {name ? name.split(" ")[0] : "User"}! {"\u{1F44B}"}
             </Text>
             {email && (
               <Text
@@ -552,6 +555,24 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
+    backgroundColor: "rgba(255, 150, 200, 0.3)",
+  },
+  circleMiddleLeft: {
+    position: "absolute",
+    top: 200,
+    left: 20,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255, 150, 200, 0.3)",
+  },
+  circleBottomRight: {
+    position: "absolute",
+    bottom: -50,
+    right: -30,
+    width: 300,
+    height: 300,
+    borderRadius: 250,
     backgroundColor: "rgba(255, 150, 200, 0.3)",
   },
   emptyContainer: {
