@@ -34,10 +34,10 @@ type ToDoType = {
 
 type HomeRouteProp = RouteProp<RootParamList, "Home">;
 
-const PUBLIC_URL = "https://c73638c5c921.ngrok-free.app";
+const PUBLIC_URL = "https://fd8760f3e9e7.ngrok-free.app";
 
 export function HomeScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootParamList>>(); // ✅ For navigation
+  const navigation = useNavigation<NativeStackNavigationProp<RootParamList>>(); // For navigation
   const route = useRoute<HomeRouteProp>();
 
   const { userId, email, name } = route.params || {};
@@ -132,7 +132,7 @@ export function HomeScreen() {
     };
 
     try {
-      // Save to local state & AsyncStorage immediately
+      // Save to  AsyncStorage
       const updatedTodos = [newTodo, ...todos];
       setTodos(updatedTodos);
       setOldTodos(updatedTodos);

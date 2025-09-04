@@ -20,6 +20,7 @@ import {
   AlertNotificationRoot,
   Toast,
 } from "react-native-alert-notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ProfileNavigationProps = NativeStackNavigationProp<
   RootParamList,
@@ -28,7 +29,7 @@ type ProfileNavigationProps = NativeStackNavigationProp<
 
 type ProfileRouteProps = RouteProp<RootParamList, "Profile">;
 
-const PUBLIC_URL = "https://c73638c5c921.ngrok-free.app"; // ✅ No spaces
+const PUBLIC_URL = "https://fd8760f3e9e7.ngrok-free.app";
 
 export function ProfileScreen({
   navigation,
@@ -97,6 +98,11 @@ export function ProfileScreen({
   const handleSave = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords don't match");
+      Toast.show({
+        type: ALERT_TYPE.WARNING,
+        title: "Warning",
+        textBody: "Passwords don't match",
+      });
 
       return;
     }
@@ -140,6 +146,7 @@ export function ProfileScreen({
         });
         setIsEditing(false);
       } else {
+        Alert.alert(json.message);
         Toast.show({
           type: ALERT_TYPE.DANGER,
           title: "Error",
@@ -154,6 +161,24 @@ export function ProfileScreen({
         textBody: "Unable to connect to server",
       });
     }
+  };
+
+  const handleLogout = async () => {
+    // Clear all user data
+    await AsyncStorage.clear();
+
+    //  Show toast
+    setTimeout(() => {
+      Alert.alert("You've been logged out successfully");
+      Toast.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: "Logged Out",
+        textBody: "You've been logged out successfully",
+      });
+    }, 100);
+
+    // Navigate to Welcome
+    navigation.replace("Welcome");
   };
 
   return (
@@ -242,6 +267,14 @@ export function ProfileScreen({
             {/* Buttons */}
             <TouchableOpacity style={styles.button} onPress={handleSave}>
               <Text style={styles.buttonText}>SAVE CHANGES</Text>
+            </TouchableOpacity>
+
+            {/* Logout Button */}
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Text style={styles.logoutText}>LOGOUT</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -400,5 +433,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  logoutButton: {
+    backgroundColor: "#E53030",
+    paddingHorizontal: 40,
+    paddingVertical: 15,
+    borderRadius: 25,
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  logoutText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

@@ -1,5 +1,5 @@
 // screens/SignupScreen.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
   View,
@@ -21,10 +21,11 @@ import {
   AlertNotificationRoot,
   Toast,
 } from "react-native-alert-notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type SignupNavigationProps = NativeStackNavigationProp<RootParamList, "Signup">;
 
-const PUBLIC_URL = "https://c73638c5c921.ngrok-free.app";
+const PUBLIC_URL = "https://fd8760f3e9e7.ngrok-free.app";
 
 export function SignupScreen() {
   const navigation = useNavigation<SignupNavigationProps>();
@@ -37,7 +38,6 @@ export function SignupScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
       allowsEditing: true,
@@ -52,179 +52,230 @@ export function SignupScreen() {
     }
   };
 
+  useEffect(() => {
+    const loadDraft = async () => {
+      try {
+        const saved = await AsyncStorage.getItem("signup_draft");
+        console.log("Draft loaded:", saved);
+
+        if (saved) {
+          const data = JSON.parse(saved);
+          console.log("Parsed data:", data);
+
+          setFirstName(data.firstName || "");
+          setLastName(data.lastName || "");
+          setEmail(data.email || "");
+          setPassword(data.password || "");
+          setConfirmPassword(data.confirmPassword || "");
+          setImage(data.image || null);
+        }
+      } catch (error) {
+        console.log("Failed to load draft", error);
+      }
+    };
+    loadDraft();
+  }, []);
+
+  useEffect(() => {
+    const saveDraft = async () => {
+      try {
+        const data = {
+          firstName,
+          lastName,
+          email,
+          password,
+          confirmPassword,
+          image,
+        };
+        console.log("Saving draft:", data);
+
+        await AsyncStorage.setItem("signup_draft", JSON.stringify(data));
+      } catch (error) {
+        console.log("Failed to save draft", error);
+      }
+    };
+    saveDraft();
+  }, [firstName, lastName, email, password, confirmPassword, image]);
+
   return (
-    <AlertNotificationRoot>
-      <KeyboardAvoidingView
-        behavior="padding"
-        keyboardVerticalOffset={40}
-        style={{ flex: 1 }}
+    <KeyboardAvoidingView
+      behavior="padding"
+      keyboardVerticalOffset={40}
+      style={{ flex: 1 }}
+    >
+      {/* Background Circles (Fixed Position) */}
+      <View style={styles.background}>
+        <View style={styles.circleTopLeft} />
+        <View style={styles.circleTopRight} />
+        <View style={styles.circleMiddleLeft} />
+        <View style={styles.circleBottomRight} />
+      </View>
+
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Background Circles (Fixed Position) */}
-        <View style={styles.background}>
-          <View style={styles.circleTopLeft} />
-          <View style={styles.circleTopRight} />
-          <View style={styles.circleMiddleLeft} />
-          <View style={styles.circleBottomRight} />
+        {/* Header */}
+        <Text style={styles.title}>Welcome Onboard!</Text>
+        <Text style={styles.subtitle}>Let's help you meet up your tasks</Text>
+
+        <View style={styles.form}>
+          <View style={styles.imageContainer}>
+            <Pressable onPress={pickImage} style={styles.imageUploader}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Text style={styles.imageText}>+</Text>
+                  <Text style={styles.imageLabel}>Add image</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
 
-        {/* Scrollable Content */}
-        <ScrollView
-          style={styles.container}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Header */}
-          <Text style={styles.title}>Welcome Onboard!</Text>
-          <Text style={styles.subtitle}>Let's help you meet up your tasks</Text>
+        {/* Form Fields */}
+        <View style={styles.formContainer}>
+          {/* First Name */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Your First name"
+            value={firstName}
+            onChangeText={setFirstName}
+            autoCapitalize="words"
+          />
 
-          <View style={styles.form}>
-            <View style={styles.imageContainer}>
-              <Pressable onPress={pickImage} style={styles.imageUploader}>
-                {image ? (
-                  <Image source={{ uri: image }} style={styles.profileImage} />
-                ) : (
-                  <View style={styles.imagePlaceholder}>
-                    <Text style={styles.imageText}>+</Text>
-                    <Text style={styles.imageLabel}>Add image</Text>
-                  </View>
-                )}
-              </Pressable>
-            </View>
-          </View>
+          {/* Last Name */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Your Last name"
+            value={lastName}
+            onChangeText={setLastName}
+            autoCapitalize="words"
+          />
 
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            {/* First Name */}
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your First name"
-              value={firstName}
-              onChangeText={setFirstName}
-              autoCapitalize="words"
-            />
+          {/* Email */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
-            {/* Last Name */}
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Your Last name"
-              value={lastName}
-              onChangeText={setLastName}
-              autoCapitalize="words"
-            />
+          {/* Password */}
+          <TextInput
+            style={styles.input}
+            placeholder="Enter password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+          />
 
-            {/* Email */}
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+          {/* Confirm Password */}
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+            autoCapitalize="none"
+          />
 
-            {/* Password */}
-            <TextInput
-              style={styles.input}
-              placeholder="Enter password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
+          {/* Sign Up Button */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              if (password != confirmPassword) {
+                Alert.alert("Password and Confirm Password must be same");
+                return;
+              }
 
-            {/* Confirm Password */}
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoCapitalize="none"
-            />
+              let formData = new FormData();
+              formData.append("firstName", firstName);
+              formData.append("lastName", lastName);
+              formData.append("email", email);
+              formData.append("password", password);
+              formData.append("confirmPassword", confirmPassword);
 
-            {/* Sign Up Button */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                if (password != confirmPassword) {
-                  Alert.alert("Password and Confirm Password must be same");
-                  return;
-                }
+              if (image) {
+                formData.append("profileImage", {
+                  uri: image,
+                  name: "profile.jpg",
+                  type: "image/jpeg",
+                } as any);
+              }
 
-                let formData = new FormData();
-                formData.append("firstName", firstName);
-                formData.append("lastName", lastName);
-                formData.append("email", email);
-                formData.append("password", password);
-                formData.append("confirmPassword", confirmPassword);
+              const response = await fetch(PUBLIC_URL + "/ToDoDoo/SignUp", {
+                method: "POST",
+                body: formData,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  "ngrok-skip-browser-warning": "any-value",
+                },
+              });
 
-                if (image) {
-                  formData.append("profileImage", {
-                    uri: image,
-                    name: "profile.jpg",
-                    type: "image/jpeg",
-                  } as any);
-                }
+              if (response.ok) {
+                const json = await response.json();
+                if (json.status) {
+                  console.log(json);
+                  //Alert.alert("Congrats! Account created successfully");
+                  Toast.show({
+                    type: ALERT_TYPE.SUCCESS,
+                    title: "Success",
+                    textBody: "Congrats! Account created successfully",
+                  });
+                  // Clear the draft after success
+                  await AsyncStorage.removeItem("signup_draft");
 
-                const response = await fetch(PUBLIC_URL + "/ToDoDoo/SignUp", {
-                  method: "POST",
-                  body: formData,
-                  headers: {
-                    "Content-Type": "multipart/form-data",
-                    "ngrok-skip-browser-warning": "any-value",
-                  },
-                });
+                  setFirstName("");
+                  setLastName("");
+                  setEmail("");
+                  setPassword("");
+                  setConfirmPassword("");
 
-                if (response.ok) {
-                  const json = await response.json();
-                  if (json.status) {
-                    console.log(json);
-                    //Alert.alert("Congrats! Account created successfully");
-                    navigation.navigate("Home", {
-                      userId: json.user.id,
-                      email: json.user.email,
-                      name: json.user.firstName + " " + json.user.lastName,
-                    });
+                  setImage(null);
 
-                    setFirstName("");
-                    setLastName("");
-                    setEmail("");
-                    setPassword("");
-                    setConfirmPassword("");
-
-                    setImage(null);
-                  } else {
-                    Alert.alert(json.message);
-                    Toast.show({
-                      type: ALERT_TYPE.DANGER,
-                      title: "Error",
-                      textBody: json.message,
-                    });
-                  }
+                  navigation.navigate("Home", {
+                    userId: json.user.id,
+                    email: json.user.email,
+                    name: json.user.firstName + " " + json.user.lastName,
+                  });
                 } else {
-                  Alert.alert("Sign Up failed. Please try again.");
+                  //Alert.alert(json.message);
+                  Toast.show({
+                    type: ALERT_TYPE.DANGER,
+                    title: "Error",
+                    textBody: json.message,
+                  });
                 }
-              }}
-            >
-              <Text style={styles.buttonText}>Sign Up</Text>
-            </TouchableOpacity>
+              } else {
+                Alert.alert("Sign Up failed. Please try again.");
+              }
+            }}
+          >
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
 
-            {/* Sign In Link */}
-            <View style={styles.linkContainer}>
-              <Text style={styles.linkText}>
-                Already have an account?{" "}
-                <Text
-                  style={[styles.linkText, styles.link]}
-                  onPress={() => navigation.navigate("Signin")}
-                >
-                  Sign in
-                </Text>
+          {/* Sign In Link */}
+          <View style={styles.linkContainer}>
+            <Text style={styles.linkText}>
+              Already have an account?{" "}
+              <Text
+                style={[styles.linkText, styles.link]}
+                onPress={() => navigation.navigate("Signin")}
+              >
+                Sign in
               </Text>
-            </View>
+            </Text>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </AlertNotificationRoot>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

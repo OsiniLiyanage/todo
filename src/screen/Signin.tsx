@@ -19,10 +19,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootParamList } from "../../App";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type SigninNavigationProps = NativeStackNavigationProp<RootParamList, "Signin">;
 
-const PUBLIC_URL = "https://c73638c5c921.ngrok-free.app";
+const PUBLIC_URL = "https://fd8760f3e9e7.ngrok-free.app";
 
 export function SigninScreen() {
   const navigation = useNavigation<SigninNavigationProps>();
@@ -85,11 +86,6 @@ export function SigninScreen() {
               />
             </View>
 
-            {/* Forgot Password */}
-            <Pressable style={styles.forgotPassword}>
-              <Text style={styles.forgotText}>Forget Password</Text>
-            </Pressable>
-
             {/* Sign In Button */}
             <TouchableOpacity
               style={styles.button}
@@ -119,11 +115,18 @@ export function SigninScreen() {
                       textBody: "Congrats! Logging successfully",
                     });
 
-                    navigation.navigate("Home", {
+                    const userData = {
                       userId: json.user.id,
                       email: json.user.email,
                       name: json.user.firstName + " " + json.user.lastName,
-                    });
+                    };
+                    await AsyncStorage.setItem(
+                      "user",
+                      JSON.stringify(userData)
+                    );
+
+                    // Navigate to Home
+                    navigation.navigate("Home", userData);
                   } else {
                     console.log(json.message);
                     Toast.show({
@@ -150,7 +153,7 @@ export function SigninScreen() {
                 Don't have an account?{" "}
                 <Text
                   style={[styles.linkText, styles.link]}
-                  onPress={() => navigation.navigate("Signup")}
+                  onPress={() => navigation.goBack()}
                 >
                   Sign up
                 </Text>
